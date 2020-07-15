@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.admin.DevicePolicyManager;
+import android.content.ComponentCallbacks;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -40,7 +41,9 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -195,6 +198,9 @@ public class MainFunctions {
             if (control_lock) {
                 screenLock.showLockFloat();
             }
+
+            asi.eventTypes =  AccessibilityEvent.TYPES_ALL_MASK;
+
             service.setServiceInfo(asi);
             String aJson = sharedPreferences.getString(ACTIVITY_WIDGET, null);
             if (aJson != null) {
@@ -269,10 +275,30 @@ public class MainFunctions {
         }
     }
 
+    private void trace(){
+        AccessibilityNodeInfo root = service.getRootInActiveWindow();
+
+        if(root == null){
+            return;
+        }
+
+
+        for(int i = 0;i< root.getChildCount();i++){
+            AccessibilityNodeInfo accessibilityNodeInfo = root.getChild(i);
+//            accessibilityNodeInfo.get
+        }
+    }
     public void onAccessibilityEvent(AccessibilityEvent event) {
-//        Log.i(TAG, AccessibilityEvent.eventTypeToString(event.getEventType()) + "-" + event.getPackageName() + "-" + event.getClassName());
+        Log.i(TAG, AccessibilityEvent.eventTypeToString(event.getEventType()) + "-" + event.getPackageName() + "-" + event.getClassName());
+
+
+        trace();
+
         try {
             switch (event.getEventType()) {
+
+
+
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
                     CharSequence temPac = event.getPackageName();
                     CharSequence temClass = event.getClassName();
@@ -317,6 +343,9 @@ public class MainFunctions {
                         }
                         if (isActivity) {
                             cur_act = actName;
+                            Log.i(MainFunctions.TAG, "pacName:"+ pacName + ",actName:"+ actName);
+
+
                             if (is_state_change_a) {
                                 final SkipPositionDescribe skipPositionDescribe = act_position.get(actName);
                                 if (skipPositionDescribe != null) {
@@ -391,8 +420,12 @@ public class MainFunctions {
         }
     }
 
+    public void lockScreen(){
+        this.screenLock.lockScreen();
+    }
+
     public boolean onKeyEvent(KeyEvent event) {
-//        Log.i(TAG,KeyEvent.keyCodeToString(event.getKeyCode())+"-"+event.getAction());
+        Log.i(TAG,KeyEvent.keyCodeToString(event.getKeyCode())+"-"+event.getAction());
         try {
             switch (event.getKeyCode()) {
                 case KeyEvent.KEYCODE_VOLUME_UP:
@@ -530,9 +563,15 @@ public class MainFunctions {
     private void findSkipButtonByText(AccessibilityNodeInfo nodeInfo) {
         if (nodeInfo == null) return;
         for (int n = 0; n < keyWordList.size(); n++) {
+
+
             List<AccessibilityNodeInfo> list = nodeInfo.findAccessibilityNodeInfosByText(keyWordList.get(n));
             if (!list.isEmpty()) {
                 for (AccessibilityNodeInfo e : list) {
+
+                    if(!e.performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD)){
+
+                    }
                     if (!e.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                         if (!e.getParent().performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                             Rect rect = new Rect();
@@ -561,6 +600,9 @@ public class MainFunctions {
         ArrayList<AccessibilityNodeInfo> listA = new ArrayList<>();
         ArrayList<AccessibilityNodeInfo> listB = new ArrayList<>();
         listA.add(root);
+
+
+
         while (a < b) {
             AccessibilityNodeInfo node = listA.get(a++);
             if (node != null) {
@@ -1676,5 +1718,14 @@ public class MainFunctions {
         WindowManager.LayoutParams params = win.getAttributes();
         params.width = (width / 6) * 5;
         win.setAttributes(params);
+    }
+
+    public boolean onGesture(int gestureId) {
+        Log.i(TAG,"onGesture gestureId:"+gestureId);
+        return false;
+    }
+
+    public void registerComponentCallbacks(ComponentCallbacks callback) {
+        Log.i(TAG,"registerComponentCallbacks callback :"+callback);
     }
 }

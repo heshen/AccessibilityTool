@@ -1,6 +1,7 @@
 package com.lgh.accessibilitytool;
 
 import android.accessibilityservice.AccessibilityService;
+import android.content.ComponentCallbacks;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.view.KeyEvent;
@@ -61,5 +62,17 @@ public class MyAccessibilityService extends AccessibilityService {
 
     @Override
     public void onInterrupt() {
+    }
+
+    @Override
+    public void registerComponentCallbacks(ComponentCallbacks callback) {
+        mainFunctions.registerComponentCallbacks(callback);
+        super.registerComponentCallbacks(callback);
+    }
+
+    @Override
+    protected boolean onGesture(int gestureId) {
+        mainFunctions.onGesture(gestureId);
+        return super.onGesture(gestureId);
     }
 }

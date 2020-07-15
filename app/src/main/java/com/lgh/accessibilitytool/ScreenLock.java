@@ -66,16 +66,7 @@ public class ScreenLock {
             public void onClick(View v) {
                 long end = System.currentTimeMillis();
                 if ((end - start) < 800) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        if (MyAccessibilityService.mainFunctions != null) {
-                            MyAccessibilityService.mainFunctions.handler.sendEmptyMessage(0x01);
-                        }
-                        if (MyAccessibilityServiceNoGesture.mainFunctions != null) {
-                            MyAccessibilityServiceNoGesture.mainFunctions.handler.sendEmptyMessage(0x01);
-                        }
-                    } else {
-                        devicePolicyManager.lockNow();
-                    }
+                    lockScreen();
                 }
                 start = end;
             }
@@ -84,6 +75,18 @@ public class ScreenLock {
         windowManager.addView(imageView, params);
     }
 
+    public void lockScreen(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            if (MyAccessibilityService.mainFunctions != null) {
+                MyAccessibilityService.mainFunctions.handler.sendEmptyMessage(0x01);
+            }
+            if (MyAccessibilityServiceNoGesture.mainFunctions != null) {
+                MyAccessibilityServiceNoGesture.mainFunctions.handler.sendEmptyMessage(0x01);
+            }
+        } else {
+            devicePolicyManager.lockNow();
+        }
+    }
     public void dismiss() {
         if (imageView != null) {
             windowManager.removeViewImmediate(imageView);

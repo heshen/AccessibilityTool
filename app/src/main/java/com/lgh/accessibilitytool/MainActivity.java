@@ -2,15 +2,19 @@ package com.lgh.accessibilitytool;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.widget.Toast;
+
+import static java.lang.Thread.sleep;
 
 public class MainActivity extends Activity {
 
@@ -76,6 +80,28 @@ public class MainActivity extends Activity {
 
         } catch (Throwable e) {
             e.printStackTrace();
+        }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    sleep(10 * 1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                lock();
+
+            }
+        }).start();
+    }
+
+    private void lock(){
+        if (MyAccessibilityService.mainFunctions != null) {
+            MyAccessibilityService.mainFunctions.lockScreen();
+        }
+        if (MyAccessibilityServiceNoGesture.mainFunctions != null) {
+            MyAccessibilityServiceNoGesture.mainFunctions.lockScreen();
         }
     }
 
